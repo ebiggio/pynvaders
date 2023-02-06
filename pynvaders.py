@@ -35,6 +35,9 @@ class Pynvaders:
         # Make the play button
         self.play_button = Button(self, "Play")
 
+        # Load the bullet sound
+        self.bullet_sound = pygame.mixer.Sound('sounds/bullet.wav')
+
     def run_game(self):
         """Main loop for the game"""
         while True:
@@ -85,14 +88,13 @@ class Pynvaders:
             # Hide the mouse cursor
             pygame.mouse.set_visible(False)
 
-
     def _check_keydown_events(self, event):
         """Respond to key presses"""
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = True
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
-        elif event.key == pygame.K_SPACE:
+        elif event.key == pygame.K_SPACE and self.stats.game_active:
             self._fire_bullet()
         elif event.key == pygame.K_q:
             sys.exit()
@@ -109,6 +111,7 @@ class Pynvaders:
         if len(self.bullets) < self.settings.bullets_allowed:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
+            self.bullet_sound.play()
 
     def _update_bullets(self):
         """Update positions of bullets and get rid of old bullets"""
