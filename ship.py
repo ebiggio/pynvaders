@@ -1,11 +1,13 @@
 import pygame
+from pygame.sprite import Sprite
 
 
-class Ship:
+class Ship(Sprite):
     """A class to manage the ship"""
 
     def __init__(self, pynvaders_game):
         """Initialize the ship and set its starting position"""
+        super().__init__()
         self.screen = pynvaders_game.screen
         self.screen_rect = pynvaders_game.screen.get_rect()
         self.settings = pynvaders_game.settings
