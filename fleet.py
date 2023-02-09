@@ -8,6 +8,7 @@ class Fleet:
         self.pynvaders_game = pynvaders_game
         self.screen = pynvaders_game.screen
         self.settings = pynvaders_game.settings
+        self.stats = pynvaders_game.stats
         self.ship = pynvaders_game.ship
         # This will store all data related to the fleet (type, health, points, etc)
         self.fleet_data = None
@@ -64,7 +65,8 @@ class Fleet:
 
                 if alien.rect.colliderect(self.ship.rect):
                     self.pynvaders_game.ship_hit()
-                    break
+
+                    return
 
         # Look for aliens hitting the bottom of the screen
         self._check_bottom_screen()
@@ -74,10 +76,18 @@ class Fleet:
         for row, aliens in self.alien_rows.items():
             for alien in aliens:
                 if alien.check_edges():
-                    self._change_row_direction(row)
+                    # For the first 5 levels, the aliens will be polite enough to wait for the rows in "front" of them
+                    # to be destroyed before moving down
+                    if self.stats.level in range(1, 6):
+                        if not row + 1 in self.alien_rows:
+                            self._drop_and_change_row_direction(row)
+                        else:
+                            self.row_direction[row] *= -1
+                    else:
+                        self._drop_and_change_row_direction(row)
                     break
 
-    def _change_row_direction(self, row_number):
+    def _drop_and_change_row_direction(self, row_number):
         """Drop a row of the fleet and change its direction"""
         for alien in self.alien_rows[row_number]:
             alien.rect.y += self.settings.fleet_drop_speed
@@ -91,4 +101,5 @@ class Fleet:
                 if alien.rect.bottom >= screen_rect.bottom:
                     # Treat this the same as if the ship got hit
                     self.pynvaders_game.ship_hit()
-                    break
+
+                    return

@@ -7,6 +7,9 @@ class GameStats:
         # Start Pynvaders in an inactive state
         self.game_active = False
 
+        # Current level
+        self.level = 1
+
         # High score should never be reset
         self.high_score = 0
 
