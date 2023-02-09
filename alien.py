@@ -5,7 +5,7 @@ from pygame.sprite import Sprite
 class Alien(Sprite):
     """A class to represent a single alien in the fleet"""
 
-    def __init__(self, pynvaders_game, row_number, alien_number):
+    def __init__(self, pynvaders_game, alien_image, row_number, alien_number):
         """Initialize the alien and set its starting position"""
         super().__init__()
         self.screen = pynvaders_game.screen
@@ -15,7 +15,7 @@ class Alien(Sprite):
         self.alien_number = alien_number
 
         # Load the alien image and set its rect attribute
-        self.image = pygame.image.load('images/alien.bmp')
+        self.image = alien_image
         self.rect = self.image.get_rect()
 
         # Start each new alien near the top left of the screen
@@ -31,7 +31,7 @@ class Alien(Sprite):
         if self.rect.right >= screen_rect.right or self.rect.left <= 0:
             return True
 
-    def update(self):
+    def update(self, row_number):
         """Move the alien right or left"""
-        self.x += (self.settings.alien_speed * self.settings.fleet_direction)
+        self.x += (self.settings.alien_speed * row_number)
         self.rect.x = self.x

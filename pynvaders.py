@@ -78,7 +78,7 @@ class Pynvaders:
             self.sb.prep_ship()
 
             # Get rid of any remaining aliens and bullets
-            self.fleet.aliens.empty()
+            self.fleet.alien_rows = dict()
             self.bullets.empty()
 
             # Create a new fleet and center the ship
@@ -128,20 +128,25 @@ class Pynvaders:
     def _check_bullet_alien_collisions(self):
         """Respond to bullet-alien collisions"""
         # Remove any bullets and aliens that have collided
-        collisions = pygame.sprite.groupcollide(self.bullets, self.fleet.aliens, True, False)
+        for row, aliens in self.fleet.alien_rows.copy().items():
+            collisions = pygame.sprite.groupcollide(self.bullets, aliens, True, False)
 
-        if collisions:
-            for aliens in collisions.values():
-                for alien in aliens:
-                    self.fleet.fleet_rows[alien.row_number][alien.alien_number] -= 1
-                    # We check the alien's health to see if it's dead
-                    if self.fleet.fleet_rows[alien.row_number][alien.alien_number] <= 0:
-                        self.fleet.aliens.remove(alien)
-                        self.stats.score += self.settings.alien_points * len(aliens)
+            if collisions:
+                for aliens_hit in collisions.values():
+                    for alien in aliens_hit:
+                        self.fleet.fleet_data[alien.row_number][alien.alien_number] -= 1
+                        # We check the alien's health to see if it's dead
+                        if self.fleet.fleet_data[alien.row_number][alien.alien_number] <= 0:
+                            aliens.remove(alien)
+                            self.stats.score += self.settings.alien_points * len(aliens_hit)
+
+                if len(aliens) == 0:
+                    self.fleet.alien_rows.pop(row)
+
             self.sb.prep_score()
             self.sb.check_high_score()
 
-        if not self.fleet.aliens:
+        if not self.fleet.alien_rows:
             # Destroy existing bullets and create new fleet
             self.bullets.empty()
             self.fleet.create_fleet()
@@ -159,7 +164,7 @@ class Pynvaders:
             self.sb.prep_ship()
 
             # Get rid of any remaining aliens and bullets
-            self.fleet.aliens.empty()
+            self.fleet.alien_rows = dict()
             self.bullets.empty()
 
             # Create a new fleet and center the ship
@@ -178,7 +183,9 @@ class Pynvaders:
         self.ship.blitme()
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
-        self.fleet.aliens.draw(self.screen)
+
+        for row, aliens in self.fleet.alien_rows.items():
+            aliens.draw(self.screen)
 
         # Draw the score information
         self.sb.show_score()
