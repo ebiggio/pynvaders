@@ -17,7 +17,7 @@ class Fleet:
         # Contains the direction of the rows of the fleet: 1 represents right; -1 represents left
         self.row_direction = dict()
 
-        self.alien_image = pygame.image.load('images/alien.bmp')
+        self.alien_image = pygame.image.load('images/aliens/green/1.png').convert_alpha()
 
     def create_fleet(self):
         """Create the fleet of aliens"""
