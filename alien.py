@@ -5,11 +5,14 @@ from pygame.sprite import Sprite
 class Alien(Sprite):
     """A class to represent a single alien in the fleet"""
 
-    def __init__(self, pynvaders_game):
+    def __init__(self, pynvaders_game, row_number, alien_number):
         """Initialize the alien and set its starting position"""
         super().__init__()
         self.screen = pynvaders_game.screen
         self.settings = pynvaders_game.settings
+
+        self.row_number = row_number
+        self.alien_number = alien_number
 
         # Load the alien image and set its rect attribute
         self.image = pygame.image.load('images/alien.bmp')
