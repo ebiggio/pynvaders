@@ -1,4 +1,5 @@
 import pygame
+import os
 from alien import Alien
 
 
@@ -11,19 +12,50 @@ class Fleet:
         self.stats = pynvaders_game.stats
         self.ship = pynvaders_game.ship
         # This will store all data related to the fleet (type, health, points, etc)
-        self.fleet_data = None
-        # Hold the rows of the fleet
+        self.fleet_data = dict()
+        # Holds the rows of the fleet
         self.alien_rows = dict()
         # Contains the direction of the rows of the fleet: 1 represents right; -1 represents left
         self.row_direction = dict()
+        # Holds the 3 types of images for the different classes of aliens
+        self.alien_images = dict()
+        self._load_alien_images()
 
-        self.alien_image = pygame.image.load('images/aliens/green/1.png').convert_alpha()
+    def _load_alien_images(self):
+        """Load the alien images, and store them in a dictionary"""
+        """
+        The dictionary will be structured as follows:
+            alien_images = {
+                'blue': {
+                    1: <image>,
+                    2: <image>,
+                    3: <image>,
+                },
+                'green': {
+                    1: <image>,
+                    2: <image>,
+                    3: <image>,
+                },
+                'orange': {
+                    etc...
+        """
+        for path, subdir, filenames in os.walk('images/aliens/'):
+            for name in filenames:
+                if name.endswith('.png'):
+                    filename = name[:-4]
+                    directory_name = os.path.basename(path)
+
+                    if directory_name not in self.alien_images:
+                        self.alien_images.update({directory_name: dict()})
+
+                    img = pygame.image.load(os.path.join(path, name)).convert_alpha()
+                    self.alien_images[directory_name].update({int(filename): img})
 
     def create_fleet(self):
         """Create the fleet of aliens"""
         # Create an alien and find the number of aliens in a row
         # Spacing between each alien is equal to one alien width
-        alien = Alien(self.pynvaders_game, self.alien_image, 0, 0)
+        alien = Alien(self.pynvaders_game, self.alien_images['green'][1], 0, 0)
         alien_width, alien_height = alien.rect.size
         available_space_x = self.settings.screen_width - (2 * alien_width)
         number_aliens_x = available_space_x // (2 * alien_width)
@@ -34,7 +66,6 @@ class Fleet:
         number_rows = available_space_y // (2 * alien_height)
 
         # Create the full fleet of aliens
-        self.fleet_data = dict()
         for row_number in range(number_rows):
             self.fleet_data[row_number] = dict()
             self.row_direction[row_number] = 1
@@ -43,11 +74,11 @@ class Fleet:
                 # This will store all data related to the alien (type, health, points, etc). For now, it's just a 1,
                 # that represents the alien's HP
                 self.fleet_data[row_number][alien_number] = 1
-                self._create_alien(row_number, alien_number)
+                self._create_alien('green', 1, row_number, alien_number)
 
-    def _create_alien(self, row_number, alien_number):
+    def _create_alien(self, alien_class, image_index, row_number, alien_number):
         """Create an alien and place it in the row"""
-        alien = Alien(self.pynvaders_game, self.alien_image, row_number, alien_number)
+        alien = Alien(self.pynvaders_game, self.alien_images[alien_class][image_index], row_number, alien_number)
         alien_width, alien_height = alien.rect.size
         alien.x = alien_width + 2 * alien_width * alien_number
         alien.rect.x = alien.x
