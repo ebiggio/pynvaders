@@ -9,6 +9,7 @@ from bullet import Bullet
 from button import Button
 from scoreboard import Scoreboard
 from fleet import Fleet
+from sounds import Sounds
 
 
 class Pynvaders:
@@ -35,8 +36,8 @@ class Pynvaders:
         # Make the play button
         self.play_button = Button(self, "Play")
 
-        # Load the bullet sound
-        self.bullet_sound = pygame.mixer.Sound('sounds/bullet.wav')
+        # We load the sound library
+        self.sounds = Sounds()
 
     def run_game(self):
         """Main loop for the game"""
@@ -111,7 +112,7 @@ class Pynvaders:
         if len(self.bullets) < self.settings.bullets_allowed:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
-            self.bullet_sound.play()
+            self.sounds.play_bullet_sound()
 
     def _update_bullets(self):
         """Update positions of bullets and get rid of old bullets"""
@@ -134,11 +135,17 @@ class Pynvaders:
             if collisions:
                 for aliens_hit in collisions.values():
                     for alien in aliens_hit:
+                        # We decrement the alien's health
                         self.fleet.fleet_data[alien.row_number][alien.alien_number] -= 1
                         # We check the alien's health to see if it's dead
                         if self.fleet.fleet_data[alien.row_number][alien.alien_number] <= 0:
                             aliens.remove(alien)
                             self.stats.score += self.settings.alien_points * len(aliens_hit)
+                            # We play and explosion sound
+                            self.sounds.play_explosion_sound()
+                        else:
+                            # We play the hit sound if the alien is not dead
+                            self.sounds.play_hit_sound()
 
                 if len(aliens) == 0:
                     self.fleet.alien_rows.pop(row)

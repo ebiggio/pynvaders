@@ -1,5 +1,6 @@
 class GameStats:
     """Track statistics for Pynvaders"""
+
     def __init__(self, pynvaders_game):
         """Initialize statistics."""
         self.settings = pynvaders_game.settings
