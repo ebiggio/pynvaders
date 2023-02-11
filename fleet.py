@@ -1,5 +1,6 @@
 import pygame
 import os
+import random
 from alien import Alien
 
 
@@ -20,6 +21,13 @@ class Fleet:
         # Holds the 3 types of images for the different classes of aliens
         self.alien_images = dict()
         self._load_alien_images()
+
+        # Holds the base HP of each alien class
+        self.alien_classes_hp = {
+            'green': [1, 3, 4],
+            'blue': [3, 5, 7],
+            'orange': [1, 2, 3],
+        }
 
     def _load_alien_images(self):
         """Load the alien images, and store them in a dictionary"""
@@ -71,10 +79,12 @@ class Fleet:
             self.row_direction[row_number] = 1
             self.alien_rows[row_number] = pygame.sprite.Group()
             for alien_number in range(number_aliens_x):
-                # This will store all data related to the alien (type, health, points, etc). For now, it's just a 1,
-                # that represents the alien's HP
-                self.fleet_data[row_number][alien_number] = 1
-                self._create_alien('green', 1, row_number, alien_number)
+                alien_data = self._get_alien_class_and_hp()
+                image_index = self.alien_classes_hp[alien_data[0]].index(alien_data[1]) + 1
+                # This will store all data related to the alien (type, health, points, etc). For now, it will only store
+                # the alien's HP
+                self.fleet_data[row_number][alien_number] = alien_data[1]
+                self._create_alien(alien_data[0], image_index, row_number, alien_number)
 
     def _create_alien(self, alien_class, image_index, row_number, alien_number):
         """Create an alien and place it in the row"""
@@ -84,6 +94,37 @@ class Fleet:
         alien.rect.x = alien.x
         alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
         self.alien_rows[row_number].add(alien)
+
+    def _get_alien_class_and_hp(self):
+        """Get a random alien class and HP"""
+        # For the first 2 levels, only the green aliens will be present
+        if self.stats.level in range(1, 3):
+            possible_classes = ['green']
+            possible_classes_prob = [1]
+        elif self.stats.level in range(3, 6):
+            # For levels 3-5, there will be a 15% chance of the blue aliens being present
+            possible_classes = ['green', 'blue']
+            possible_classes_prob = [0.85, 0.15]
+        else:
+            # From level 6 and forward, we will calculate the probability of each alien class being chosen, increasing
+            # as the player progresses through the levels
+            possible_classes = ['green', 'blue', 'orange']
+            green_prob = (self.stats.level - 5) * 0.01
+            blue_prob = (self.stats.level - 5) * 0.001
+            orange_prob = (self.stats.level - 5) * 0.0005
+            possible_classes_prob = [green_prob, blue_prob, orange_prob]
+
+        alien_class_list = random.choices(possible_classes, weights=possible_classes_prob)
+        alien_class = alien_class_list[0]
+
+        # From the fourth level and forward, there will be a small probability for the chosen alien class to have more
+        # HP. Each alien class have 3 possible HP values, and the probability of each one is 85%, 10% and 5%
+        if self.stats.level > 4:
+            alien_hp = random.choices(self.alien_classes_hp[alien_class], weights=[0.85, 0.10, 0.05])
+        else:
+            alien_hp = self.alien_classes_hp[alien_class]
+
+        return alien_class, alien_hp[0]
 
     def update_aliens(self):
         """Check if any of the rows of the fleet is at an edge, then update the position of all aliens in the row"""

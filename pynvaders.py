@@ -147,14 +147,14 @@ class Pynvaders:
             self.sb.check_high_score()
 
         if not self.fleet.alien_rows:
+            # Increase level
+            self.stats.level += 1
+            self.sb.prep_level()
+
             # Destroy existing bullets and create new fleet
             self.bullets.empty()
             self.fleet.create_fleet()
             self.settings.increase_speed()
-
-            # Increase level
-            self.stats.level += 1
-            self.sb.prep_level()
 
     def ship_hit(self):
         """Respond to the ship being hit by an alien"""
