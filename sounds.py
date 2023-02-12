@@ -22,7 +22,7 @@ class Sounds:
         # Explosion sound
         # We create a channel for the explosion sound so that it doesn't overlap with the other sounds
         self.explosion_channel = pygame.mixer.Channel(2)
-        self.explosion_channel.set_volume(0.3)
+        self.explosion_channel.set_volume(0.5)
         self.explosion_sound1 = pygame.mixer.Sound('sounds/explosions/explosion_1.wav')
         self.explosion_sound2 = pygame.mixer.Sound('sounds/explosions/explosion_2.wav')
 
