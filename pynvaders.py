@@ -30,14 +30,14 @@ class Pynvaders:
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
 
+        # We load the sound library
+        self.sounds = Sounds()
+
         # Create the fleet of aliens
         self.fleet = Fleet(self)
 
         # Make the play button
         self.play_button = Button(self, "Play")
-
-        # We load the sound library
-        self.sounds = Sounds()
 
     def run_game(self):
         """Main loop for the game"""
@@ -128,30 +128,12 @@ class Pynvaders:
 
     def _check_bullet_alien_collisions(self):
         """Respond to bullet-alien collisions"""
-        # Remove any bullets and aliens that have collided
         for row, aliens in self.fleet.alien_rows.copy().items():
+            # We remove any bullet that has collided with an alien
             collisions = pygame.sprite.groupcollide(self.bullets, aliens, True, False)
 
             if collisions:
-                for aliens_hit in collisions.values():
-                    for alien in aliens_hit:
-                        # We decrement the alien's hit points
-                        alien.hp -= 1
-                        # We check the alien's health to see if it's dead
-                        if alien.hp <= 0:
-                            aliens.remove(alien)
-                            self.stats.score += self.settings.alien_points * len(aliens_hit)
-                            # We play and explosion sound
-                            self.sounds.play_explosion_sound()
-                        else:
-                            if alien.hp in self.fleet.alien_classes_hp[alien.alien_class]:
-                                image_index = self.fleet.alien_classes_hp[alien.alien_class].index(alien.hp)
-                                alien.image = self.fleet.alien_images[alien.alien_class][image_index + 1]
-                            # We play the hit sound if the alien is not dead
-                            self.sounds.play_hit_sound()
-
-                if len(aliens) == 0:
-                    self.fleet.alien_rows.pop(row)
+                self.fleet.process_bullet_alien_collisions(collisions, aliens, row)
 
             self.sb.prep_score()
             self.sb.check_high_score()

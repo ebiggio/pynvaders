@@ -12,6 +12,7 @@ class Fleet:
         self.settings = pynvaders_game.settings
         self.stats = pynvaders_game.stats
         self.ship = pynvaders_game.ship
+        self.sounds = pynvaders_game.sounds
         # Holds the rows of the fleet
         self.alien_rows = dict()
         # Contains the direction of the rows of the fleet: 1 represents right; -1 represents left
@@ -121,6 +122,31 @@ class Fleet:
             alien_hp = self.alien_classes_hp[alien_class]
 
         return alien_class, alien_hp[0]
+
+    def process_bullet_alien_collisions(self, collisions, aliens, row):
+        """Process bullet-alien collisions"""
+        # We check the collisions dictionary to decrement the alien's HP that was hit by a bullet
+        for aliens_hit in collisions.values():
+            for alien in aliens_hit:
+                # We decrement the alien's hit points
+                alien.hp -= 1
+                # We check the alien's health to see if it's dead
+                if alien.hp <= 0:
+                    aliens.remove(alien)
+                    self.stats.score += self.settings.alien_points
+                    # We play an explosion sound
+                    self.sounds.play_explosion_sound()
+                else:
+                    # We check if the alien has a different image for the current HP that it has. If it does, we change
+                    # the alien's image to the one that corresponds to the current HP
+                    if alien.hp in self.alien_classes_hp[alien.alien_class]:
+                        image_index = self.alien_classes_hp[alien.alien_class].index(alien.hp)
+                        alien.image = self.alien_images[alien.alien_class][image_index + 1]
+                    # We play the hit sound, since the alien is still alive
+                    self.sounds.play_hit_sound()
+
+        if len(aliens) == 0:
+            self.alien_rows.pop(row)
 
     def update_aliens(self):
         """Check if any of the rows of the fleet is at an edge, then update the position of all aliens in the row"""
