@@ -12,8 +12,6 @@ class Fleet:
         self.settings = pynvaders_game.settings
         self.stats = pynvaders_game.stats
         self.ship = pynvaders_game.ship
-        # This will store all data related to the fleet (type, health, points, etc)
-        self.fleet_data = dict()
         # Holds the rows of the fleet
         self.alien_rows = dict()
         # Contains the direction of the rows of the fleet: 1 represents right; -1 represents left
@@ -63,7 +61,7 @@ class Fleet:
         """Create the fleet of aliens"""
         # Create an alien and find the number of aliens in a row
         # Spacing between each alien is equal to one alien width
-        alien = Alien(self.pynvaders_game, self.alien_images['green'][1], 0, 0)
+        alien = Alien(self.pynvaders_game, 'green', 1, self.alien_images['green'][1], 0, 0)
         alien_width, alien_height = alien.rect.size
         available_space_x = self.settings.screen_width - (2 * alien_width)
         number_aliens_x = available_space_x // (2 * alien_width)
@@ -75,20 +73,18 @@ class Fleet:
 
         # Create the full fleet of aliens
         for row_number in range(number_rows):
-            self.fleet_data[row_number] = dict()
             self.row_direction[row_number] = 1
             self.alien_rows[row_number] = pygame.sprite.Group()
             for alien_number in range(number_aliens_x):
                 alien_data = self._get_alien_class_and_hp()
                 image_index = self.alien_classes_hp[alien_data[0]].index(alien_data[1]) + 1
-                # This will store all data related to the alien (type, health, points, etc). For now, it will only store
-                # the alien's HP
-                self.fleet_data[row_number][alien_number] = alien_data[1]
-                self._create_alien(alien_data[0], image_index, row_number, alien_number)
 
-    def _create_alien(self, alien_class, image_index, row_number, alien_number):
+                self._create_alien(alien_data[0], alien_data[1], image_index, row_number, alien_number)
+
+    def _create_alien(self, alien_class, hp, image_index, row_number, alien_number):
         """Create an alien and place it in the row"""
-        alien = Alien(self.pynvaders_game, self.alien_images[alien_class][image_index], row_number, alien_number)
+        alien = Alien(self.pynvaders_game, alien_class, hp, self.alien_images[alien_class][image_index]
+                      , row_number, alien_number)
         alien_width, alien_height = alien.rect.size
         alien.x = alien_width + 2 * alien_width * alien_number
         alien.rect.x = alien.x

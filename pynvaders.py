@@ -135,15 +135,18 @@ class Pynvaders:
             if collisions:
                 for aliens_hit in collisions.values():
                     for alien in aliens_hit:
-                        # We decrement the alien's health
-                        self.fleet.fleet_data[alien.row_number][alien.alien_number] -= 1
+                        # We decrement the alien's hit points
+                        alien.hp -= 1
                         # We check the alien's health to see if it's dead
-                        if self.fleet.fleet_data[alien.row_number][alien.alien_number] <= 0:
+                        if alien.hp <= 0:
                             aliens.remove(alien)
                             self.stats.score += self.settings.alien_points * len(aliens_hit)
                             # We play and explosion sound
                             self.sounds.play_explosion_sound()
                         else:
+                            if alien.hp in self.fleet.alien_classes_hp[alien.alien_class]:
+                                image_index = self.fleet.alien_classes_hp[alien.alien_class].index(alien.hp)
+                                alien.image = self.fleet.alien_images[alien.alien_class][image_index + 1]
                             # We play the hit sound if the alien is not dead
                             self.sounds.play_hit_sound()
 
