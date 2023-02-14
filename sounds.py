@@ -6,11 +6,11 @@ class Sounds:
     # Class to load and play the sounds of the game
 
     def __init__(self):
-        # Bullet sound
+        # Ship (player) bullet sound
         # We create a channel for the bullet sound so that it doesn't overlap with the hit sound
-        self.bullet_channel = pygame.mixer.Channel(0)
-        self.bullet_channel.set_volume(0.3)
-        self.bullet_sound = pygame.mixer.Sound('sounds/bullet.wav')
+        self.ship_bullet_channel = pygame.mixer.Channel(0)
+        self.ship_bullet_channel.set_volume(0.3)
+        self.ship_bullet_sound = pygame.mixer.Sound('sounds/ship_bullet.wav')
 
         # Hit sound
         # We create a channel for the hit sound so that it doesn't overlap with the bullet sound, and we set the volume
@@ -26,9 +26,14 @@ class Sounds:
         self.explosion_sound1 = pygame.mixer.Sound('sounds/explosions/explosion_1.wav')
         self.explosion_sound2 = pygame.mixer.Sound('sounds/explosions/explosion_2.wav')
 
+        # Alien bullet sound
+        self.alien_bullet_channel = pygame.mixer.Channel(3)
+        self.alien_bullet_channel.set_volume(0.5)
+        self.alien_bullet_sound = pygame.mixer.Sound('sounds/alien_bullet.wav')
+
     def play_bullet_sound(self):
         # Plays the bullet sound
-        self.bullet_channel.play(self.bullet_sound)
+        self.ship_bullet_channel.play(self.ship_bullet_sound)
 
     def play_hit_sound(self):
         # Plays the hit sound
@@ -40,3 +45,7 @@ class Sounds:
         explosion_sound = random.choice([self.explosion_sound1, self.explosion_sound2])
         # We play the explosion sound
         self.explosion_channel.play(explosion_sound)
+
+    def play_alien_bullet_sound(self):
+        # Plays the alien bullet sound
+        self.alien_bullet_channel.play(self.alien_bullet_sound)

@@ -1,11 +1,12 @@
 import sys
+import time
 from time import sleep
 import pygame
 
 from settings import Settings
 from game_stats import GameStats
 from ship import Ship
-from bullet import Bullet
+import bullets
 from button import Button
 from scoreboard import Scoreboard
 from fleet import Fleet
@@ -28,7 +29,8 @@ class Pynvaders:
         self.sb = Scoreboard(self)
 
         self.ship = Ship(self)
-        self.bullets = pygame.sprite.Group()
+        self.player_bullets = pygame.sprite.Group()
+        self.alien_bullets = pygame.sprite.Group()
 
         # We load the sound library
         self.sounds = Sounds()
@@ -46,7 +48,6 @@ class Pynvaders:
 
             if self.stats.game_active:
                 self.ship.update()
-                self.bullets.update()
                 self._update_bullets()
                 self.fleet.update_aliens()
 
@@ -75,16 +76,11 @@ class Pynvaders:
             self.stats.reset_stats()
             self.stats.game_active = True
             self.sb.prep_score()
-            self.sb.prep_level()
             self.sb.prep_ship()
 
-            # Get rid of any remaining aliens and bullets
-            self.fleet.alien_rows = dict()
-            self.bullets.empty()
-
-            # Create a new fleet and center the ship
-            self.fleet.create_fleet()
             self.ship.center_ship()
+
+            self._prepare_level()
 
             # Hide the mouse cursor
             pygame.mouse.set_visible(False)
@@ -109,28 +105,25 @@ class Pynvaders:
 
     def _fire_bullet(self):
         """Create a new bullet and add it to the bullets group"""
-        if len(self.bullets) < self.settings.bullets_allowed:
-            new_bullet = Bullet(self)
-            self.bullets.add(new_bullet)
+        if len(self.player_bullets) < self.settings.player_bullets_allowed:
+            new_player_bullet = bullets.PlayerBullet(self)
+            self.player_bullets.add(new_player_bullet)
             self.sounds.play_bullet_sound()
 
     def _update_bullets(self):
         """Update positions of bullets and get rid of old bullets"""
         # Update bullet positions
-        self.bullets.update()
-
-        # Get rid of bullets that have disappeared
-        for bullet in self.bullets.copy():
-            if bullet.rect.bottom <= 0:
-                self.bullets.remove(bullet)
+        self.player_bullets.update()
+        self.alien_bullets.update()
 
         self._check_bullet_alien_collisions()
+        self._check_bullet_ship_collisions()
 
     def _check_bullet_alien_collisions(self):
         """Respond to bullet-alien collisions"""
         for row, aliens in self.fleet.alien_rows.copy().items():
             # We remove any bullet that has collided with an alien
-            collisions = pygame.sprite.groupcollide(self.bullets, aliens, True, False)
+            collisions = pygame.sprite.groupcollide(self.player_bullets, aliens, True, False)
 
             if collisions:
                 self.fleet.process_bullet_alien_collisions(collisions, aliens, row)
@@ -141,30 +134,30 @@ class Pynvaders:
         if not self.fleet.alien_rows:
             # Increase level
             self.stats.level += 1
-            self.sb.prep_level()
 
-            # Destroy existing bullets and create new fleet
-            self.bullets.empty()
-            self.fleet.create_fleet()
+            # Increase game speed
             self.settings.increase_speed()
 
+            self._prepare_level()
+
+    def _check_bullet_ship_collisions(self):
+        """Respond to bullet-ship collisions"""
+        if pygame.sprite.spritecollideany(self.ship, self.alien_bullets):
+            self.ship_hit()
+
     def ship_hit(self):
-        """Respond to the ship being hit by an alien"""
+        """Respond to the ship being hit by an alien or an alien bullet"""
         if self.stats.ships_left > 0:
             # Decrement ships_left, and update scoreboard
             self.stats.ships_left -= 1
             self.sb.prep_ship()
 
-            # Get rid of any remaining aliens and bullets
-            self.fleet.alien_rows = dict()
-            self.bullets.empty()
-
-            # Create a new fleet and center the ship
-            self.fleet.create_fleet()
             self.ship.center_ship()
 
             # Pause
             sleep(0.5)
+
+            self._prepare_level()
         else:
             self.stats.game_active = False
             pygame.mouse.set_visible(True)
@@ -173,7 +166,10 @@ class Pynvaders:
         """Update images on the screen, and flip to the new screen"""
         self.screen.fill(self.settings.bg_color)
         self.ship.blitme()
-        for bullet in self.bullets.sprites():
+        for bullet in self.player_bullets.sprites():
+            bullet.draw_bullet()
+
+        for bullet in self.alien_bullets.sprites():
             bullet.draw_bullet()
 
         for row, aliens in self.fleet.alien_rows.items():
@@ -188,6 +184,18 @@ class Pynvaders:
 
         # Make the most recently drawn screen visible
         pygame.display.flip()
+
+    def _prepare_level(self):
+        """Prepare the level's score"""
+        self.sb.prep_level()
+
+        # Destroy existing bullets and create new fleet
+        self.player_bullets.empty()
+        self.alien_bullets.empty()
+        self.fleet.create_fleet()
+
+        # Define the start time of the level
+        self.stats.start_time = time.time()
 
 
 if __name__ == '__main__':

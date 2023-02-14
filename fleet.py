@@ -73,6 +73,8 @@ class Fleet:
         number_rows = available_space_y // (2 * alien_height)
 
         # Create the full fleet of aliens
+        self.alien_rows = dict()
+
         for row_number in range(number_rows):
             self.row_direction[row_number] = 1
             self.alien_rows[row_number] = pygame.sprite.Group()
@@ -108,7 +110,7 @@ class Fleet:
             possible_classes = ['green', 'blue', 'orange']
             green_prob = (self.stats.level - 5) * 0.01
             blue_prob = (self.stats.level - 5) * 0.001
-            orange_prob = (self.stats.level - 5) * 0.0005
+            orange_prob = (self.stats.level - 5) * 0.0009
             possible_classes_prob = [green_prob, blue_prob, orange_prob]
 
         alien_class_list = random.choices(possible_classes, weights=possible_classes_prob)
