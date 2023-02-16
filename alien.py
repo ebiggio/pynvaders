@@ -36,6 +36,9 @@ class Alien(Sprite):
         # Store the alien's exact horizontal position
         self.x = float(self.rect.x)
 
+        # Shooting cooldown. A single orange alien will only be able to shoot a bullet every 2 seconds
+        self.shooting_cooldown = 0
+
     def check_edges(self):
         """Returns True if alien is at edge of the screen"""
         screen_rect = self.screen.get_rect()
@@ -55,11 +58,12 @@ class Alien(Sprite):
 
     def _shoot_bullet(self):
         """Shoot a bullet from the alien"""
-        if len(self.alien_bullets) < self.settings.alien_bullets_allowed:
+        if len(self.alien_bullets) < self.settings.alien_bullets_allowed and time.time() - self.shooting_cooldown >= 2:
             shooting_chance = random.choice(range(1, 100))
 
-            # The chance of the alien shooting a bullet is 70%
-            if shooting_chance <= 70:
+            # The chance of the alien shooting a bullet is 60%
+            if shooting_chance <= 60:
                 new_alien_bullet = AlienBullet(self, self.rect.midbottom)
                 self.alien_bullets.add(new_alien_bullet)
                 self.sounds.play_alien_bullet_sound()
+                self.shooting_cooldown = time.time()
