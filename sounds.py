@@ -31,6 +31,11 @@ class Sounds:
         self.alien_bullet_channel.set_volume(0.5)
         self.alien_bullet_sound = pygame.mixer.Sound('sounds/alien_bullet.wav')
 
+        # Alien kamikaze sound
+        self.alien_kamikaze_channel = pygame.mixer.Channel(4)
+        self.alien_kamikaze_channel.set_volume(1)
+        self.alien_kamikaze_sound = pygame.mixer.Sound('sounds/alien_kamikaze.wav')
+
     def play_bullet_sound(self):
         # Plays the bullet sound
         self.ship_bullet_channel.play(self.ship_bullet_sound)
@@ -49,3 +54,7 @@ class Sounds:
     def play_alien_bullet_sound(self):
         # Plays the alien bullet sound
         self.alien_bullet_channel.play(self.alien_bullet_sound)
+
+    def play_alien_kamikaze_sound(self):
+        # Plays the alien kamikaze sound
+        self.alien_kamikaze_channel.play(self.alien_kamikaze_sound)
