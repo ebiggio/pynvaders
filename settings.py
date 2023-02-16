@@ -27,11 +27,11 @@ class Settings:
         self.alien_bullets_allowed = 4
 
         # Alien settings
-        self.alien_speed = 0.2
+        self.alien_speed = 0.15
         self.fleet_drop_speed = 10
 
         # How quickly the game speeds up
-        self.speedup_scale = 0.8
+        self.speedup_scale = 1.05
 
         # How quickly the alien point value increases
         self.score_scale = 1.5
@@ -42,7 +42,7 @@ class Settings:
         """Initialize settings that change throughout the game"""
         self.ship_speed = 1.5
         self.player_bullet_speed = 1.0
-        self.alien_speed = 0.2
+        self.alien_speed = 0.15
 
         # Scoring
         self.alien_points = 50
