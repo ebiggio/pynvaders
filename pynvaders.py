@@ -121,7 +121,7 @@ class Pynvaders:
 
     def _check_bullet_alien_collisions(self):
         """Respond to bullet-alien collisions"""
-        for row, aliens in self.fleet.alien_rows.copy().items():
+        for row, aliens in self.fleet.fleet_rows.copy().items():
             # We remove any bullet that has collided with an alien
             collisions = pygame.sprite.groupcollide(self.player_bullets, aliens, True, False)
 
@@ -131,7 +131,7 @@ class Pynvaders:
             self.sb.prep_score()
             self.sb.check_high_score()
 
-        if not self.fleet.alien_rows:
+        if not self.fleet.fleet_rows:
             # Increase level
             self.stats.level += 1
 
@@ -172,7 +172,7 @@ class Pynvaders:
         for bullet in self.alien_bullets.sprites():
             bullet.draw_bullet()
 
-        for row, aliens in self.fleet.alien_rows.items():
+        for row, aliens in self.fleet.fleet_rows.items():
             aliens.draw(self.screen)
 
         # Draw the score information

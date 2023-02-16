@@ -14,7 +14,7 @@ class Fleet:
         self.ship = pynvaders_game.ship
         self.sounds = pynvaders_game.sounds
         # Holds the rows of the fleet
-        self.alien_rows = dict()
+        self.fleet_rows = dict()
         # Contains the direction of the rows of the fleet: 1 represents right; -1 represents left
         self.row_direction = dict()
         # Holds the 3 types of images for the different classes of aliens
@@ -73,11 +73,11 @@ class Fleet:
         number_rows = available_space_y // (2 * alien_height)
 
         # Create the full fleet of aliens
-        self.alien_rows = dict()
+        self.fleet_rows = dict()
 
         for row_number in range(number_rows):
             self.row_direction[row_number] = 1
-            self.alien_rows[row_number] = pygame.sprite.Group()
+            self.fleet_rows[row_number] = pygame.sprite.Group()
             for alien_number in range(number_aliens_x):
                 alien_data = self._get_alien_class_and_hp()
                 image_index = self.alien_classes_hp[alien_data[0]].index(alien_data[1]) + 1
@@ -91,8 +91,9 @@ class Fleet:
         alien_width, alien_height = alien.rect.size
         alien.x = alien_width + 2 * alien_width * alien_number
         alien.rect.x = alien.x
-        alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
-        self.alien_rows[row_number].add(alien)
+        alien.y = alien.rect.height + 2 * alien.rect.height * row_number
+        alien.rect.y = alien.y
+        self.fleet_rows[row_number].add(alien)
 
     def _get_alien_class_and_hp(self):
         """Get a random alien class and HP"""
@@ -148,14 +149,14 @@ class Fleet:
                     self.sounds.play_hit_sound()
 
         if len(aliens) == 0:
-            self.alien_rows.pop(row)
+            self.fleet_rows.pop(row)
 
     def update_aliens(self):
         """Check if any of the rows of the fleet is at an edge, then update the position of all aliens in the row"""
         self._check_row_edges()
 
         # Look for alien-ship collisions
-        for row, aliens in self.alien_rows.items():
+        for row, aliens in self.fleet_rows.items():
             for alien in aliens:
                 alien.update(self.row_direction[row])
 
@@ -169,13 +170,13 @@ class Fleet:
 
     def _check_row_edges(self):
         """Respond appropriately if any aliens in a row have reached an edge"""
-        for row, aliens in self.alien_rows.items():
+        for row, aliens in self.fleet_rows.items():
             for alien in aliens:
                 if alien.check_edges():
                     # For the first 5 levels, the aliens will be polite enough to wait for the rows in "front" of them
                     # to be destroyed before moving down
                     if self.stats.level in range(1, 6):
-                        if not row + 1 in self.alien_rows:
+                        if not row + 1 in self.fleet_rows:
                             self._drop_and_change_row_direction(row)
                         else:
                             self.row_direction[row] *= -1
@@ -185,14 +186,15 @@ class Fleet:
 
     def _drop_and_change_row_direction(self, row_number):
         """Drop a row of the fleet and change its direction"""
-        for alien in self.alien_rows[row_number]:
-            alien.rect.y += self.settings.fleet_drop_speed
+        for alien in self.fleet_rows[row_number]:
+            alien.y += self.settings.fleet_drop_speed
+            alien.rect.y = alien.y
         self.row_direction[row_number] *= -1
 
     def _check_bottom_screen(self):
         """Check if any aliens have reached the bottom of the screen"""
         screen_rect = self.screen.get_rect()
-        for row, aliens in self.alien_rows.items():
+        for row, aliens in self.fleet_rows.items():
             for alien in aliens:
                 if alien.rect.bottom >= screen_rect.bottom:
                     # Treat this the same as if the ship got hit
